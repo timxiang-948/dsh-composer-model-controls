@@ -2,7 +2,7 @@
 
 本文件记录 `dsh-composer-model-controls` 的版本迭代，格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
-> 说明：`0.1.0` – `0.4.3` 是插件在本地开发、实机验证期间的迭代版本，未发布到 npm；`0.4.4` 是**首个公开发布版本**（npm 与 GitHub Release）。
+> 说明：`0.1.0` – `0.4.4` 是插件在本地开发、实机验证期间的迭代版本，未公开发布；`0.4.5` 是**首个开源发布版本**（npm 与 GitHub Release）。
 
 ## [0.4.5] - 2026-11-10
 
