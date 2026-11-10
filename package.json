@@ -1,0 +1,71 @@
+{
+  "name": "dsh-composer-model-controls",
+  "version": "0.4.4",
+  "description": "Codex-style model + reasoning-effort controls in the DSH composer tool row: adaptive effort slider with snap, gradient/stardust track, effort-coloured composer border, and Shift+Tab cycling.",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "composer",
+    "model-selection",
+    "reasoning-effort",
+    "ui"
+  ],
+  "author": {
+    "name": "GITHUB_USERNAME",
+    "url": "https://github.com/GITHUB_USERNAME"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GITHUB_USERNAME/dsh-composer-model-controls.git"
+  },
+  "homepage": "https://github.com/GITHUB_USERNAME/dsh-composer-model-controls#readme",
+  "bugs": {
+    "url": "https://github.com/GITHUB_USERNAME/dsh-composer-model-controls/issues"
+  },
+  "engines": {
+    "node": ">=20",
+    "dsh": ">=0.2.2-rc.1 <0.3.0"
+  },
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "assets",
+    "cordis.patch.yml",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "screenshots.json"
+  ],
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@deepseek-ai/cordis": ">=4.0.5 <5.0.0",
+    "@deepseek-ai/dsh-client-ui-primitives": ">=0.2.2-rc.1 <0.3.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [],
+      "platform": "web"
+    },
+    "manifestVersion": 1
+  },
+  "scripts": {
+    "check": "node --check lib/client.js && node --check lib/index.js",
+    "preview": "node tools/preview/build.mjs",
+    "pack": "node scripts/package.mjs"
+  }
+}

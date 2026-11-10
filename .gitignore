@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+
+# release artifacts
+dist/
+*.tgz
+
+# preview harness build output / downloaded React UMD
+tools/preview/out/
+tools/preview/vendor/
+
+# local tooling
+.DS_Store
+Thumbs.db
+*.log

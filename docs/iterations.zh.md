@@ -1,0 +1,132 @@
+# dsh-composer-model-controls 迭代记录
+
+本文档记录插件从 `0.1.0` 到 `0.4.4` 的迭代过程：每次改动解决什么问题、当时的取舍、踩过的坑，以及验证方式。正式的逐版本变更清单见 [`../CHANGELOG.md`](../CHANGELOG.md)。
+
+> 版本说明：`0.1.0` – `0.4.3` 为本地开发迭代，`0.4.4` 为首个公开发布版本（npm / GitHub Release）。
+
+## 背景与目标
+
+DSH 默认把**模型选择**与**推理强度**收在输入框工具行的一个小 chip 里，切换推理等级需要先打开 `/model` 弹层、再进入二级列表。目标是把这两项“解放”出来，放在输入框附近随手可及的位置，并把推理档位改成一个更直观的滑块：
+
+- 模型与推理档位都必须和 `/model` 共用同一份会话状态；
+- 档位不能硬编码，完全来自模型在 DSH 模型目录里声明的 `reasoning.efforts`；
+- 交互要跟手（Codex 风格滑块：拖动、松手吸附）；
+- 视觉上要能一眼看出当前档位：轨道颜色、滑块光晕、输入框描边联动。
+
+## 时间线总览
+
+| 版本 | 日期 | 主题 |
+| --- | --- | --- |
+| 0.1.0 | 2026-11-09 | 控件从二级菜单解放到输入框下方 |
+| 0.2.0 | 2026-11-10 | 搬入输入卡片工具行；推理强度滑块；Shift+Tab |
+| 0.3.0 | 2026-11-10 | 整轨单色、弹层不透明、拖动跟手 |
+| 0.4.0 | 2026-11-10 | 仅左侧着色、星尘向左、档位名对齐、2px 同色描边 |
+| 0.4.1 | 2026-11-10 | 中性灰淡出、色轮插值（蓝→橙经品红） |
+| 0.4.2 | 2026-11-10 | 修复描边不可见（`border:0`）；长跨度去饱和 |
+| 0.4.3 | 2026-11-10 | 乐观吸附防闪回、光晕同步、Off 保留描边、柔光回归 |
+| 0.4.4 | 2026-11-10 | 描边收细为 1px + 柔光；首个公开发布版本 |
+
+## 0.1.0 — 从二级菜单解放出来
+
+**需求**：把模型选择和推理等级从二级选项里拿出来，并列于输入框下方。
+
+**实现**：在 `conversation.composer.dock`（输入卡片下方的环境行）注册一组并排控件，同时在 `conversation.hero.options` 注册一份，覆盖“新会话还没有 dock 行”的阶段。模型菜单按供应商分组、当前项勾选；推理等级菜单列出当前模型公开的档位。用 `priority: -1` 阴影内置的 `conversation.input.model` 座位，避免出现两个模型入口。
+
+**验证**：安装到 desktop profile（`link:` 依赖）后，在实机上通过 UI Automation 找到两个 chip（`选择模型` / `选择推理等级`），并用键盘打开菜单确认了分组与勾选状态。
+
+## 0.2.0 — 搬进输入卡片，推理档位变成滑块
+
+**需求**：控件回到消息发送框**之内**，与权限控件同一行、发送按钮左侧；推理等级点开后是 Codex 风格滑块，档位自适应；支持拖动吸附、键盘控制、Shift+Tab 循环；自定义 provider 指引；轨道渐变 + 星尘；输入框随档位变色；状态同步与失败回滚。
+
+**实现**：
+
+- 改为注册 `conversation.input.model`（`priority: -1` 阴影内置座位），插件因此落在输入卡片的 trailing 行：权限 chip 右侧、发送按钮左侧。
+- 滑块档位读取 `ModelDirectory` 快照里当前模型的 `reasoning.efforts`；点击/拖动轨道、松手吸附最近档位。
+- 与 `/model` 共用同一 `ModelDirectory`：`select()` 提交、`useSyncExternalStore` 读取，任何一边修改都会同步。
+- Shift+Tab 通过 `ctx.shortcuts.register` 注册（desktop 三个平台均为 `Tab + shift`），冲突或服务不可用时降级为 document 级监听。
+- 自定义 provider 指引面板：当模型未声明 `reasoning.efforts` 时，展示 `cordis.patch.yml` 中 `reasoningEfforts` 的声明方式、建议档位和可复制的 YAML 片段。
+
+**踩坑：弹层永远不出现。** 组件把菜单包装与滑块弹层收进了 `children` 数组，但返回输入行时只渲染了 `modelChip`、`effortChip`、`errorNode` —— `aria-expanded` 变成 `true` 却看不到任何东西。这个问题在实机上很难定位（合成鼠标事件又受窗口焦点干扰），最终靠**独立预览 harness**（把真实 `lib/client.js` 跑在 headless Edge 里）才复现并修复：把返回值改成 `children.concat([errorNode])`。
+
+## 0.3.0 — 整轨单色、弹层不透明、拖动跟手
+
+**反馈**：拖动略不跟手；轨道颜色应为“当前档位单色”而不是从左到右的渐变；方向键无响应，删掉只留 Shift+Tab；弹层要改为不透明并去掉面板内的操作说明。
+
+**实现**：
+
+- `toneAt()` 在相邻档位色之间按位置插值，整条轨道在档位上显示单一档位色，拖动时连续过渡；短跨度保持鲜明。
+- 弹层不透明化：读 `getComputedStyle` 的 `backgroundColor`，透明度 < 1 时与页面底色合成后写回。
+- 跟手优化：去掉 `width` / `left` 的 CSS transition；`pointerdown` 缓存轨道 rect，拖动期间不再触发布局读取；`dragRef` 作为同步状态源，快速 down→up 也能正确提交。
+- 删除方向键处理，保留 Shift+Tab 循环（跳过 `Off`，到顶回到最低档）。
+
+## 0.4.0 — 左侧填充、向左星尘、档位名对齐、同色描边
+
+**反馈**：只有滑块左侧需要颜色；星尘要从滑块向左发射；最左端原来向灰色淡出（后改为向白色，再改为中性灰）；输入框边框要跟随轨道颜色且加宽到 2 倍；档位名要与目标位置的滑块中心对齐。
+
+**实现**：填充与星尘宽度用百分比，右侧保留底轨；`@keyframes` 反向让粒子左移；档位名绝对定位（`left: index/(count-1)*100%` + `translateX(-50%)`）；输入框描边接入拖动实时色（`onTone` 从滑块传到控制条）。
+
+**踩坑：描边变黑。** 拖动中实时颜色是 `rgb(...)` 字符串，而 `rgba()` 只接受 hex，解析失败后回退成黑色。新增 `toneAlpha()` 同时兼容两种输入。
+
+## 0.4.1 — 中性灰与色轮插值
+
+**反馈**：最左端改为向中性色 `#5b6270` 淡出；去掉松手后会消失的柔光；蓝→橙不要经过发暗的混色，应该走色轮顺时针（经过品红附近）。
+
+**实现**：HSL 插值按色相递增方向计算（`delta = (hB - hA + 360) % 360`），中性色参与过渡时退回 RGB 混合；移除外发光（0.4.3 按新需求恢复）。
+
+## 0.4.2 — 描边不可见的根因，与长跨度柔化
+
+**反馈**：描边颜色和 2px 宽度都看不见；蓝→橙按色相递增会经过红色，红色比橙色更抢眼，观感差。
+
+**根因**：DSH 的 composer 卡片 CSS 是 `border: 0`（`.uV2eVG_card`），插件只改 `borderColor / borderWidth`，浏览器不会渲染任何边框。此前“看起来有边框”其实是旧的 `box-shadow` 外发光。修复方式是两层：
+
+- 用 `box-shadow: inset 0 0 0 2px <tone>` 画内描边，并把原 elevation 阴影追加在后面（卸载时恢复原 `box-shadow`）。内描边不占布局、不改变卡片高度。
+- 长跨度过渡加柔化包络：`LONG_SPAN_DEG = 100`，中段 `sin(πt)` 降饱和（`MID_DESAT = 0.55`）并向 `MID_LIGHT = 0.66` 提亮（`MID_LIFT = 0.6`）；进入红色相位（`hue ∈ [340°, 15°]`）时额外限幅 `sat ≤ 0.55`、`light ≥ 0.62`。
+
+**验证**：83% 处得到 `rgb(198,115,199)` 柔和兰紫，95% 处 `rgb(211,105,106)` 鲑粉，均不再出现刺眼鲜红。
+
+## 0.4.3 — 乐观吸附、光晕同步、Off 描边、柔光回归
+
+**反馈**：松手吸附时会闪回旧档位；滑块周围的光晕要与轨道/边框同色；吸附到 `Off` 时边框颜色效果消失；恢复输入框柔光。
+
+**实现**：
+
+- **乐观档位**：`select()` 提交期间使用 `pendingEffort` 作为显示来源（旋钮位置、chip 文案、边框颜色），目录确认后清空；失败/超时（2.5s）回滚并重新 `load()`。这样在目录延迟确认时也不会闪回。
+- 滑块光晕（4px halo + 18px glow）与轨道/ring 使用同一实时色。
+- `Off` 使用中性色 ring，不再清空边框。
+- 恢复 22px 外柔光，松手后常驻。
+
+## 0.4.4 — 1px 描边 + 柔光，首个公开版本
+
+**反馈**：输入框改为彩色 **1px** 描边 + 外柔光。
+
+**实现**：ring 收细为 `inset 0 0 0 1px rgba(tone, .9)`，保留 `0 0 22px rgba(tone, .32)`；颜色来源、`Off` 持久化与 elevation 保留逻辑不变。
+
+**附带处理**：开发期截图自动化脚本曾给 DSH 主窗口留下 `WS_EX_TOPMOST`，导致客户端“完全置顶”。已用 `SetWindowPos(hwnd, HWND_NOTOPMOST, …)` 清除并复核扩展样式（`topmost=False`）。插件本身不操作窗口样式。
+
+**公开**：本版本作为首个公开发布版本，补充 `CHANGELOG.md`、本迭代记录、`LICENSE`、市场截图与发布打包脚本。
+
+## 设计与技术决策
+
+- **注册位置**：用 `conversation.input.model` + `priority: -1` 阴影内置座位，而不是在 dock 行另起一行 —— 满足“在输入框之内、与权限同排、发送按钮左侧”，同时保留 `/model` 命令。
+- **状态单一来源**：所有显示来自 `ModelDirectory` 快照；只在 `select()` 在途时使用乐观档位，失败回滚，避免出现“界面档位”和“会话真实档位”长期分叉。
+- **档位自适应**：不硬编码 `off/low/high/max` 的语义颜色表作为唯一来源，而是“按 id/name 匹配常见档位 → 否则按顺序在绿/蓝/橙之间插值”，因此自定义模型声明任意档位也能得到合理颜色。
+- **颜色策略**：单色轨道（不是渐变）+ 色相递增插值 + 长跨度去饱和 + 红色区间限幅，兼顾“能看出档位”和“过渡不刺眼”。
+- **边框实现**：DSH 卡片是 `border: 0`，因此必须用 inset `box-shadow`；同时保留原 elevation，卸载时恢复原值，避免污染宿主样式。
+- **无构建步骤**：`lib/client.js` 是手写的 DSH 浏览器模块包，只依赖平台基线模块（`react`、`react-dom`、`@deepseek-ai/dsh-client-ui-primitives`），任何改动都能被 HMR 直接加载。
+
+## 验证方法
+
+1. **独立预览 harness**：把真实 `lib/client.js` 与 UMD React、假的 `ctx`（locale / effect / inject / slots / modelDirectories / sessions / shortcuts）组合成静态页面，用 headless Edge 渲染截图并注入交互（点击、拖动、键盘、延迟提交）。见 [`../tools/preview/README.md`](../tools/preview/README.md)。
+2. **实机验证**：安装到 desktop profile（`link:` 依赖）后用 UI Automation 定位 chip、读取 `ExpandCollapseState`、打开菜单核对分组与勾选。
+3. **截图证据**：`assets/screenshot-1.png`（High 蓝）、`screenshot-2.png`（拖动中过渡）、`screenshot-3.png`（Off 中性）、`screenshot-4.png`（Max 橙）。
+
+## 已知问题与后续计划
+
+- 音乐类候选：把 `Off` 的“无效果”与“中性色描边”做成可选项（不同用户偏好不一致）。
+- `Shift+Tab` 与宿主/其它插件的快捷键冲突时目前静默降级为 document 监听，后续可在插件设置里提供开关或改绑提示。
+- 自定义档位名称过长时 chip 会截断（当前 `max-width: 260px`），后续可加 tooltip。
+- 如果 DSH 后续版本导出 composer 卡片样式变量或官方 border slot，优先改用官方方案替代 `box-shadow` 内描边。
+
+## 发布记录
+
+- `0.4.4`：首个公开版本。npm 包 `dsh-composer-model-controls@0.4.4`；GitHub 仓库 <https://github.com/GITHUB_USERNAME/dsh-composer-model-controls>（发布时创建）；插件市场条目见 `docs/market/`。

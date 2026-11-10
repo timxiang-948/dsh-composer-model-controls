@@ -1,0 +1,13 @@
+# Submission entry for awesome-dsh-plugin.
+#
+# Copy this file to data/plugins/GITHUB_USERNAME__dsh-composer-model-controls.yml
+# in a fork of https://github.com/awesome-dsh-plugin/awesome-dsh-plugin after
+# replacing GITHUB_USERNAME with the real GitHub owner. One PR = one entry.
+url: https://github.com/GITHUB_USERNAME/dsh-composer-model-controls
+name: GITHUB_USERNAME/dsh-composer-model-controls
+category: ui
+description:
+  en: Model and reasoning-effort controls in the DSH composer tool row, with an adaptive effort slider and an effort-coloured composer border.
+  zh: 把模型与推理强度控件放到 DSH 输入框工具行，并提供自适应推理强度滑块与随档位变色的输入框描边。
+icon: https://raw.githubusercontent.com/GITHUB_USERNAME/dsh-composer-model-controls/main/assets/icon-180.png
+tarball: https://github.com/GITHUB_USERNAME/dsh-composer-model-controls/releases/latest/download/dsh-composer-model-controls.tgz

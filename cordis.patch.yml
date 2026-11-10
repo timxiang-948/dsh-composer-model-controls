@@ -1,0 +1,6 @@
+# Mount the pure-UI plugin as a Loader entry. The node half is empty; the
+# browser half is discovered through package.json#dsh.client and served by
+# @deepseek-ai/dsh-client-modules.
+- insert:
+    - id: composer-model-controls
+      name: 'dsh-composer-model-controls'
