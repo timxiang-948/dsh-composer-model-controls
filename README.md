@@ -1,6 +1,6 @@
 # dsh-composer-model-controls
 
-把会话的**模型选择**与**推理强度**放在输入框里顺手的位置：和权限（自动审查）控件同一行、发送按钮左侧，点开就是 Codex 风格的推理强度滑块。
+把会话的**模型选择**与**推理强度**放在输入框里顺手的位置：和权限控件同一行、发送按钮左侧，点开是 Codex 风格的推理强度滑块。
 
 DSH 默认把模型与推理等级收在输入框工具行的一个小 chip（`/model` 弹层）里，切换推理等级要先开菜单再进二级列表。本插件把这两项直接放到输入卡片内：
 
@@ -8,6 +8,10 @@ DSH 默认把模型与推理等级收在输入框工具行的一个小 chip（`/
 - **推理强度 chip**：显示当前档位，点开是滑块面板。
 
 两者都读写 `ctx.modelDirectories` 的同一个 `ModelDirectory`，与 `/model` 共用会话状态，任何一边切换、另一边即时同步。
+
+同时参考 Pi Harness 的思路，为对应推理强度赋予了不同的颜色：推理强度轨道和消息输入框的边框颜色可以随调整而渐变，也可以直接用 `Shift + Tab` 快捷切换推理强度。
+
+现在对模型推理强度的查看和调整变得更加方便直观了。
 
 ## 行为细节
 
@@ -23,7 +27,7 @@ DSH 默认把模型与推理等级收在输入框工具行的一个小 chip（`/
 - 点击或拖动轨道即可切换，**松手吸附到最近档位**；拖动过程中轨道颜色随位置连续过渡，到达吸附点时稳定落在目标档位颜色。
 - **只有滑块左侧的轨道部分有颜色与星尘**，右侧保持空白；颜色为当前档位的单一颜色（不是从左到右的多色渐变）：`Off` 档为中性色 `#5b6270`（最左端向中性灰淡出）、`Low` 绿色、`High` 蓝色、`Max` 橙色，其它自定义档位按顺序在绿→蓝→橙之间插值。
 - 两个档位之间过渡时按**色轮顺时针（色相递增）方向**插值，例如 `High` 蓝 → `Max` 橙会经过品红/紫色，而不是混合出灰暗的颜色；中性色参与过渡时退回普通 RGB 混合。
-- 对**长跨度**（色相差 >100°）的过渡做柔化：中段降低饱和度并向浅色提亮，靠近红色相位时再额外压低饱和度，因此不会出现比橙色更抢眼的鲜红；短跨度（如 `Low`→`High`）保持鲜明。相关常量：`LONG_SPAN_DEG`/`MID_DESAT`/`MID_LIGHT`/`MID_LIFT`。
+- 对**长跨度**（色相差 >100°）的过渡做柔化：中段降低饱和度并向浅色提亮，靠近红色相位时再额外压低饱和度，因此不会出现比橙色更抢眼的鲜红；短跨度（如 `Low`→`High`）也做温和柔化，进入青/蓝绿区间（165°–200°）时限制色度与亮度，避免绿→蓝途中出现荧光青。相关常量：`LONG_SPAN_DEG`/`MID_DESAT`/`MID_LIGHT`/`MID_LIFT`/`SHORT_SPAN_DEG`/`SHORT_DESAT`/`SHORT_LIFT`/`CYAN_BAND_MIN`/`CYAN_BAND_MAX`/`CYAN_SAT_CAP`。
 - 星尘粒子由滑块向**左**发射，叠加在已填充的一段轨道上。
 - 档位名（`Off`/`Low`/…）按目标档位在轨道上的百分比绝对定位，与对应位置的滑块中心对齐。
 - **滑块光晕同步**：滑块外围的 4px 光晕与 18px 柔光使用和轨道、输入框 ring 相同的实时颜色（拖动中取过渡色，吸附后取档位色）。
@@ -125,6 +129,10 @@ node tools\preview\build.mjs
 
 ## English
 
-DSH keeps the model + reasoning-effort switcher inside the composer's `/model` flyout. This plugin puts both directly into the composer card tool row — same row as the permission chip, immediately left of the send button — and turns the effort chip into a Codex-style slider: stops come from the model's published `reasoning.efforts`, drag/click snaps to the nearest stop on release, `Shift+Tab` cycles from low to high. Only the part of the track left of the knob is coloured (with stardust drifting leftward); the colour is the single current level tone — neutral `#5b6270` at `Off`, then green/blue/orange — and during a drag it interpolates along the hue wheel in the increasing direction (blue → orange passes through magenta instead of turning muddy). The composer card gets a 1px coloured inset border plus a soft outer glow drawn with `box-shadow` (DSH cards are `border:0`, so a real border would never render; the inset ring does not change layout). Both follow the track colour live while dragging, persist at every level including `Off` (neutral tone), and settle on the confirmed level afterwards. While a `select()` is in flight the slider keeps an optimistic stop, so the knob no longer jumps back to the previous level before the directory confirms; the knob halo and glow use the same tone as the track and card ring. Long hue spans are muted mid-transition (lower saturation, lifted lightness, extra red-phase clamp) so blue → orange passes through magenta without flashing vivid red. The slider stays in sync with `/model` through the shared `ModelDirectory` (failed updates re-sync and keep the last confirmed level). Models without declared efforts get a copyable `reasoningEfforts` YAML snippet for `cordis.patch.yml`. No build step: `lib/client.js` is a hand-authored DSH browser module requiring only `react`, `react-dom` and `@deepseek-ai/dsh-client-ui-primitives`.
+DSH keeps the model + reasoning-effort switcher inside the composer's `/model` flyout. This plugin puts both directly into the composer card tool row — same row as the permission chip, immediately left of the send button — and turns the effort chip into a Codex-style slider.
+
+Inspired by Pi Harness, every reasoning level gets its own colour: the effort track and the composer card's border tint live while you adjust, and `Shift+Tab` cycles through the levels — so seeing and changing the model's reasoning effort is quicker and more intuitive.
+
+Stops come from the model's published `reasoning.efforts`, drag/click snaps to the nearest stop on release, `Shift+Tab` cycles from low to high. Only the part of the track left of the knob is coloured (with stardust drifting leftward); the colour is the single current level tone — neutral `#5b6270` at `Off`, then green/blue/orange — and during a drag it interpolates along the hue wheel in the increasing direction (blue → orange passes through magenta instead of turning muddy). The composer card gets a 1px coloured inset border plus a soft outer glow drawn with `box-shadow` (DSH cards are `border:0`, so a real border would never render; the inset ring does not change layout). Both follow the track colour live while dragging, persist at every level including `Off` (neutral tone), and settle on the confirmed level afterwards. While a `select()` is in flight the slider keeps an optimistic stop, so the knob no longer jumps back to the previous level before the directory confirms; the knob halo and glow use the same tone as the track and card ring. Long hue spans are muted mid-transition (lower saturation, lifted lightness, extra red-phase clamp) so blue → orange passes through magenta without flashing vivid red; short spans such as green → blue get a gentler mute plus a cyan-band cap, so the drag never flashes neon cyan. The slider stays in sync with `/model` through the shared `ModelDirectory` (failed updates re-sync and keep the last confirmed level). Models without declared efforts get a copyable `reasoningEfforts` YAML snippet for `cordis.patch.yml`. No build step: `lib/client.js` is a hand-authored DSH browser module requiring only `react`, `react-dom` and `@deepseek-ai/dsh-client-ui-primitives`.
 
 Install with `dsh plugin --profile desktop add dsh-composer-model-controls` (npm) or point `dsh plugin add` at the local checkout. See [CHANGELOG.md](CHANGELOG.md) for the release history and [docs/iterations.zh.md](docs/iterations.zh.md) for the detailed (Chinese) iteration notes.

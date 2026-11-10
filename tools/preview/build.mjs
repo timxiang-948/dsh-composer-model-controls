@@ -496,3 +496,63 @@ buildPage({
   clean: true,
   current: { provider: "deepseek-account", model: "deepseek-v4.1-flash", reasoningEffort: "off" },
 });
+
+// Short-span test: green (Low, index 1/3) -> blue (High, 2/3). Samples the
+// track tone at ~40%, 50%, 60% of the knob travel without releasing.
+const shortSpanJs = `setTimeout(function () {
+  var bs = document.querySelectorAll("button[aria-label]");
+  for (var i = 0; i < bs.length; i++) { if (bs[i].getAttribute("aria-label") === "选择推理等级") { bs[i].click(); break; } }
+}, 500);
+setTimeout(function () {
+  var el = document.querySelector("[role=slider]");
+  if (!el) { return; }
+  var r = el.getBoundingClientRect();
+  var y = r.top + r.height / 2;
+  function pe(type, ratio) {
+    el.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, clientX: r.left + r.width * ratio, clientY: y, pointerId: 1, pointerType: "mouse", isPrimary: true, buttons: 1 }));
+  }
+  window.__samples = [];
+  function sample(label) {
+    var fill = document.querySelector(".dsh-mec-fill");
+    var knob = document.querySelector(".dsh-mec-knob");
+    window.__samples.push(label + " knob=" + (knob ? knob.style.left : "?") + " fill=" + (fill ? getComputedStyle(fill).backgroundColor : "?"));
+  }
+  pe("pointerdown", 1 / 3);
+  setTimeout(function () {
+    sample("low(33%)");
+    pe("pointermove", 0.42);
+    setTimeout(function () {
+      sample("42%");
+      pe("pointermove", 0.50);
+      setTimeout(function () {
+        sample("50%");
+        pe("pointermove", 0.56);
+        setTimeout(function () { sample("56%"); }, 200);
+      }, 200);
+    }, 200);
+  }, 250);
+  setTimeout(function () {
+    var pre = document.createElement("pre");
+    pre.style.cssText = "position:fixed;left:14px;bottom:14px;margin:0;font-size:11px;line-height:1.6;color:#334;background:#fff;border:1px solid #dde;border-radius:8px;padding:8px 10px;max-width:1100px;white-space:pre-wrap;z-index:999999";
+    pre.textContent = "short-span green->blue samples\\n" + (window.__samples || []).join("\\n");
+    document.body.appendChild(pre);
+  }, 1900);
+}, 900);`;
+buildPage({ name: "preview-shortspan.html", autoOpen: shortSpanJs });
+
+const cleanShortSpanJs = `setTimeout(function () {
+  var bs = document.querySelectorAll("button[aria-label]");
+  for (var i = 0; i < bs.length; i++) { if (bs[i].getAttribute("aria-label") === "选择推理等级") { bs[i].click(); break; } }
+}, 500);
+setTimeout(function () {
+  var el = document.querySelector("[role=slider]");
+  if (!el) { return; }
+  var r = el.getBoundingClientRect();
+  var y = r.top + r.height / 2;
+  function pe(type, ratio) {
+    el.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, clientX: r.left + r.width * ratio, clientY: y, pointerId: 1, pointerType: "mouse", isPrimary: true, buttons: 1 }));
+  }
+  pe("pointerdown", 1 / 3);
+  pe("pointermove", 0.5);
+}, 900);`;
+buildPage({ name: "clean-shortspan.html", autoOpen: cleanShortSpanJs, clean: true });
