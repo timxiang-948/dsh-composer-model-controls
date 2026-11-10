@@ -109,13 +109,18 @@ fs.rmSync(outDir, { recursive: true, force: true });
 fs.mkdirSync(outDir, { recursive: true });
 const pnpmArgs = /pnpm\.m?js$/.test(pnpm) ? [pnpm, "pack"] : ["pack"];
 const command = /pnpm\.m?js$/.test(pnpm) ? process.execPath : pnpm;
-const packed = spawnSync(command, [...pnpmArgs, "--pack-destination", outDir], {
+// npm / pnpm 在 Windows 上是 .cmd 包装脚本，CreateProcess 不能直接执行，
+// 必须经由 shell 启动；走 shell 时路径要自己补引号。
+const useShell = process.platform === "win32";
+const packDest = useShell ? `"${outDir}"` : outDir;
+const packed = spawnSync(command, [...pnpmArgs, "--pack-destination", packDest], {
   cwd: root,
   stdio: "inherit",
-  shell: false,
+  shell: useShell,
 });
 if (packed.status !== 0) {
-  console.error("\npnpm pack failed with status " + packed.status);
+  const detail = packed.error ? ` (${packed.error.code})` : "";
+  console.error("\npack failed with status " + packed.status + detail);
   process.exit(packed.status ?? 1);
 }
 
