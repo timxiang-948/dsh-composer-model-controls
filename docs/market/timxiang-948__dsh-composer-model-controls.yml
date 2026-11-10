@@ -1,8 +1,3 @@
-# Submission entry for awesome-dsh-plugin.
-#
-# Copy this file to data/plugins/timxiang-948__dsh-composer-model-controls.yml
-# in a fork of https://github.com/awesome-dsh-plugin/awesome-dsh-plugin after
-# replacing timxiang-948 with the real GitHub owner. One PR = one entry.
 url: https://github.com/timxiang-948/dsh-composer-model-controls
 name: timxiang-948/dsh-composer-model-controls
 category: ui
