@@ -2,7 +2,8 @@
 
 ## 提交前
 
-1. 把 `docs/market/GITHUB_USERNAME__dsh-composer-model-controls.yml` 里的 `GITHUB_USERNAME` 全部替换为真实 GitHub owner，复制为 `awesome-dsh-plugin` 仓库中的 `data/plugins/<owner>__dsh-composer-model-controls.yml`。
+1. 直接复制本仓库 `docs/market/timxiang-948__dsh-composer-model-controls.yml`（已无占位符、无注释）到 `awesome-dsh-plugin` 仓库的 `data/plugins/` 下，文件名保持 `timxiang-948__dsh-composer-model-controls.yml`（owner 与 repo 之间是双下划线）。
+   先 Fork 上游仓库并点 **Sync fork**（CI 第一项 `Stale-fork guard` 会检查 fork 是否落后）；PR 必须开在上游仓库，不要开在自己 fork 里。
 2. 确认已满足市场 CI 的硬性条件：
    - 仓库公开、创建已满 1 天；
    - 仓库已添加 topic `dsh-plugin`；
