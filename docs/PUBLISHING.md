@@ -21,7 +21,7 @@
 
 ```powershell
 cd D:\MyProjects\harness\deepseekharness\dsh-composer-model-controls
-git grep -n "GITHUB_"     # 应只剩本文件与 docs/market/PR.md 里的说明性文字
+git grep -n "GITHUB_"     # 只应命中本文件里这处说明；其余位置应已全部替换
 ```
 
 以下几处必须指向真实仓库，否则市场 CI 无法把 npm 包与仓库条目匹配：
