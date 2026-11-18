@@ -2,7 +2,7 @@
 
 本文档记录插件从 `0.1.0` 到 `0.5.0` 的迭代过程：每次改动解决什么问题、当时的取舍、踩过的坑，以及验证方式。正式的逐版本变更清单见 [`../CHANGELOG.md`](../CHANGELOG.md)。
 
-> 版本说明：`0.1.0` – `0.4.3` 为本地开发迭代，`0.4.4` 是首个公开发布候选版本，`0.4.5` 为首个公开发布版本（npm / GitHub Release）。
+> 版本说明：`0.1.0` – `0.4.3` 为本地开发迭代，`0.4.4` 是首个公开发布候选版本，`0.4.5` 为首个公开发布版本（npm / GitHub Release），`0.5.0` 为当前最新发布版本（2026-11-18）。
 
 ## 背景与目标
 
@@ -174,4 +174,4 @@ DSH 默认把**模型选择**与**推理强度**收在输入框工具行的一�
 ## 发布记录
 
 - `0.4.5`：首个开源发布版本。npm 包 `dsh-composer-model-controls@0.4.5`；GitHub 仓库 <https://github.com/timxiang-948/dsh-composer-model-controls>；插件市场条目见 `docs/market/`。
-- `0.5.0`：适配 DSH `0.2.2-rc.3`（只接管推理强度，保留内置模型菜单与团队协作开关）。npm 包 `dsh-composer-model-controls@0.5.0`（本轮发布）；本地 git tag `v0.5.0`；Release 附件与市场条目沿用 `dist/dsh-composer-model-controls.tgz` 与 `docs/market/`。
+- `0.5.0`：适配 DSH `0.2.2-rc.3`（只接管推理强度，保留内置模型菜单与团队协作开关）。npm 包 `dsh-composer-model-controls@0.5.0`（2026-11-18 发布，`latest`）；本地 git tag `v0.5.0`；GitHub Release <https://github.com/timxiang-948/dsh-composer-model-controls/releases/tag/v0.5.0> 附件与市场条目沿用 `dist/dsh-composer-model-controls.tgz` 与 `docs/market/`。

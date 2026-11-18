@@ -71,7 +71,7 @@ my-provider:
 纯 UI 插件（node 半端为空 `apply`，浏览器半端由 `package.json#dsh.client` 声明，由 `@deepseek-ai/dsh-client-modules` 提供）。
 
 ```powershell
-# 从 npm（公开发布后）
+# 从 npm（当前最新 0.5.0）
 dsh plugin --profile desktop add dsh-composer-model-controls
 
 # 或本地路径（开发）
