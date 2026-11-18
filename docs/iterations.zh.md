@@ -174,3 +174,4 @@ DSH 默认把**模型选择**与**推理强度**收在输入框工具行的一�
 ## 发布记录
 
 - `0.4.5`：首个开源发布版本。npm 包 `dsh-composer-model-controls@0.4.5`；GitHub 仓库 <https://github.com/timxiang-948/dsh-composer-model-controls>；插件市场条目见 `docs/market/`。
+- `0.5.0`：适配 DSH `0.2.2-rc.3`（只接管推理强度，保留内置模型菜单与团队协作开关）。npm 包 `dsh-composer-model-controls@0.5.0`（本轮发布）；本地 git tag `v0.5.0`；Release 附件与市场条目沿用 `dist/dsh-composer-model-controls.tgz` 与 `docs/market/`。
