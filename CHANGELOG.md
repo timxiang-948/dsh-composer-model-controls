@@ -2,7 +2,24 @@
 
 本文件记录 `dsh-composer-model-controls` 的版本迭代，格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
-> 说明：`0.1.0` – `0.4.4` 是插件在本地开发、实机验证期间的迭代版本，未公开发布；`0.4.5` 是**首个开源发布版本**（npm 与 GitHub Release）。
+> 说明：`0.1.0` – `0.4.4` 是插件在本地开发、实机验证期间的迭代版本，未公开发布；`0.4.5` 是首个候选发布版本；`0.5.0` 适配 DSH `0.2.2-rc.3` 的输入框布局，是当前推荐版本。
+
+## [0.5.0] - 2026-11-18
+
+### Changed
+
+- **只接管推理强度，不再替换内置模型 chip**：DSH `0.2.2-rc.3` 的模型菜单新增「启用智能体团队协作」等选项（注册在 `conversation.input.model.options` 插槽）。插件此前用 `priority: -1` 阴影整个 `conversation.input.model` 座位，导致这些子插槽不再声明、团队协作开关消失。
+- 推理强度控件改为注册在 `conversation.input.right`（`id: reasoning-effort-controls`，`order: 10`），渲染在内置模型 chip 左侧、发送按钮之前；删除对 `conversation.input.model` 的阴影注册与 `conversation.hero.options` 注册。
+- 代码同步精简：移除模型 chip、`Menu` 模型列表、模型选择状态与文案（保留模型目录查询仅用于读取当前模型的 `reasoning.efforts`），组件更名为 `ReasoningEffortControl`。
+
+### Verification
+
+- DSH `0.2.2-rc.3` 实机：UIA 可见 `选择推理等级`（我们）与 `选择模型，当前 DeepSeek-V4.1-Flash，推理等级 High`（内置），两者同一行且推理强度在左；打开内置模型菜单可见 `模型与推理等级`，菜单内 `启用智能体团队协作` 文本/开关仍在。
+- 独立预览 `tools/preview`：mock 行改为「推理强度 chip + 内置模型 chip + 发送」，`clean-high/dragmid/off/max` 重新出图并替换 `assets/screenshot-1..4.png`。
+
+### Docs
+
+- README 中英文改为“只接管推理强度、内置模型菜单保持不变”，更新位置说明、兼容性（已在 rc.3 验证）、验证记录与市场截图。
 
 ## [0.4.5] - 2026-11-10
 
@@ -131,6 +148,7 @@
 
 | 插件版本 | DSH | 说明 |
 | --- | --- | --- |
+| 0.5.0 | `>=0.2.2-rc.1 <0.3.0` | 适配 DSH 0.2.2-rc.3：只接管推理强度，保留内置模型菜单与团队协作开关；实机验证 0.2.2-rc.3 |
 | 0.4.5 | `>=0.2.2-rc.1 <0.3.0` | 修复绿→蓝过渡荧光青；实机验证 0.2.2-rc.1 |
 | 0.4.4 | `>=0.2.2-rc.1 <0.3.0` | 首个公开版本；实机验证 0.2.2-rc.1 |
 | 0.1.0 – 0.4.3 | `0.2.2-rc.1` | 本地迭代版本，未公开发布 |

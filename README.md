@@ -1,13 +1,13 @@
 # dsh-composer-model-controls
 
-把会话的**模型选择**与**推理强度**放在输入框里顺手的位置：和权限控件同一行、发送按钮左侧，点开是 Codex 风格的推理强度滑块。
+把会话的**推理强度**从 `/model` 弹层里单独拿出来，放在输入框工具行里顺手的位置（内置模型 chip 左侧），点开是 Codex 风格的推理强度滑块。
 
-DSH 默认把模型与推理等级收在输入框工具行的一个小 chip（`/model` 弹层）里，切换推理等级要先开菜单再进二级列表。本插件把这两项直接放到输入卡片内：
+DSH 默认把模型与推理等级收在输入框工具行的一个小 chip（`/model` 弹层）里，切换推理等级要先开菜单再进二级列表。本插件只接管**推理强度**：
 
-- **模型 chip**：按供应商分组列出全部模型，当前项勾选；
-- **推理强度 chip**：显示当前档位，点开是滑块面板。
+- **推理强度 chip**：显示当前档位，点开是滑块面板；
+- **内置模型菜单保持原样**：模型选择、以及菜单里的「启用智能体团队协作」等其它选项都不动。
 
-两者都读写 `ctx.modelDirectories` 的同一个 `ModelDirectory`，与 `/model` 共用会话状态，任何一边切换、另一边即时同步。
+推理强度读写 `ctx.modelDirectories` 的同一个 `ModelDirectory`，与 `/model` 弹层里的推理等级共用会话状态，任何一边切换、另一边即时同步。
 
 同时参考 Pi Harness 的思路，为对应推理强度赋予了不同的颜色：推理强度轨道和消息输入框的边框颜色可以随调整而渐变，也可以直接用 `Shift + Tab` 快捷切换推理强度。
 
@@ -17,8 +17,8 @@ DSH 默认把模型与推理等级收在输入框工具行的一个小 chip（`/
 
 ### 位置
 
-- 注册在 `conversation.input.model` 插槽（`priority: -1`，阴影内置 chip），因此渲染在输入卡片底行、权限 chip 右侧、发送按钮左侧。
-- 新会话 hero 阶段（还没有 dock/工具行数据时）同样的控件通过 `conversation.hero.options` 出现在 workspace/preset 选项行里。
+- 注册在 `conversation.input.right` 插槽（`order: 10`），渲染在输入卡片底行、内置模型 chip 的**左侧**、发送按钮之前；内置模型 chip 与它的菜单不再被阴影/替换。
+- 不再注册 `conversation.input.model`，因此 DSH 0.2.2-rc.3 模型菜单里的「模型 / 推理等级 / 启用智能体团队协作」三项保持完整。
 - 子代理（subagent）会话不渲染。
 
 ### 推理强度滑块
@@ -64,7 +64,7 @@ my-provider:
 
 - 显示以 `ModelDirectory` 快照（`useSyncExternalStore`）为准；`select()` 在途时使用**乐观档位**（旋钮、chip、描边立即停在目标档位），目录确认后转为正式状态，避免吸附后闪回旧档位。
 - 提交失败时记录错误、回滚乐观档位并调用 `directory.load()` 重新同步，界面回到**上一个已确认档位**，chip 与真实会话设置不会长期分叉。
-- `select()` 进行中（`state.pending !== null` 或 `status === "selecting"`）两个 chip 均禁用，避免并发切换。
+- `select()` 进行中（`state.pending !== null` 或 `status === "selecting"`）该控件禁用，避免并发切换。
 
 ## 安装
 
@@ -102,9 +102,9 @@ node tools\preview\build.mjs
 
 ## 验证记录
 
-已在 DSH 桌面版 `0.2.2-rc.1` 实机 + 独立预览中验证：
+已在 DSH 桌面版 `0.2.2-rc.3` 实机 + 独立预览中验证：
 
-- 实机：两个 chip 位于输入卡片底行、权限 chip 右侧、发送按钮左侧；`High` 时为蓝色 1px 描边 + 柔光。
+- 实机：推理强度 chip 位于内置模型 chip 左侧、发送按钮之前；内置模型菜单仍包含「启用智能体团队协作」，不再被插件遮挡；`High` 时为蓝色 1px 描边 + 柔光。
 - 独立预览与截图（`assets/screenshot-1..4.png`）：
   - `screenshot-1.png`：`High` 蓝色轨道 / 描边 / 光晕；
   - `screenshot-2.png`：拖动中（15%）仅左侧着色，颜色与描边连续过渡；
@@ -123,13 +123,13 @@ node tools\preview\build.mjs
 
 ## 兼容性
 
-- 面向 DSH `0.2.2-rc.1` 的客户端插件 API（slots / locale / shortcuts / model-selection 服务）。
+- 面向 DSH `0.2.2-rc.1` 及之后（已在 `0.2.2-rc.3` 验证）的客户端插件 API（slots / locale / shortcuts / model-selection 服务）。
 - 仅使用公开插槽契约与 `ctx.modelDirectories`、`ctx.shortcuts`，不修改任何内置包。
 - 若宿主已有命令占用 `Shift+Tab`，插件会退回自己的 document 监听；如仍冲突可在快捷键设置里改绑。
 
 ## English
 
-DSH keeps the model + reasoning-effort switcher inside the composer's `/model` flyout. This plugin puts both directly into the composer card tool row — same row as the permission chip, immediately left of the send button — and turns the effort chip into a Codex-style slider.
+DSH keeps the model + reasoning-effort switcher inside the composer's `/model` flyout. This plugin pulls the reasoning effort out on its own and puts it into the composer card tool row, immediately left of the built-in model chip — while leaving the built-in model menu (model selection and options such as the agent-team toggle) untouched. The effort chip opens a Codex-style slider.
 
 Inspired by Pi Harness, every reasoning level gets its own colour: the effort track and the composer card's border tint live while you adjust, and `Shift+Tab` cycles through the levels — so seeing and changing the model's reasoning effort is quicker and more intuitive.
 

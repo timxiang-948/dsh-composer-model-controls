@@ -1,6 +1,6 @@
 # 发布流程（npm / GitHub / 插件市场）
 
-本文件记录 `dsh-composer-model-controls` **0.4.5 首次公开发布实际走通的路径**：Windows + npm + GitHub 网页操作，不依赖 pnpm 与 gh CLI。
+本文件记录 `dsh-composer-model-controls` **0.5.0 首次公开发布实际走通的路径**：Windows + npm + GitHub 网页操作，不依赖 pnpm 与 gh CLI。
 
 真实身份：GitHub 账号 `timxiang-948`，npm 账号 `timxiang`（两者不同，靠 `package.json` 的 `repository` 字段关联，属正常）。
 
@@ -8,7 +8,7 @@
 
 | 项目 | 本仓库的实际情况 |
 | --- | --- |
-| npm 账号 | `timxiang <timxiang_948@163.com>`，已发布 `0.4.5` |
+| npm 账号 | `timxiang <timxiang_948@163.com>`，已发布 `0.5.0` |
 | GitHub 仓库 | `https://github.com/timxiang-948/dsh-composer-model-controls`，公开 |
 | 仓库 topic | `dsh-plugin`（**单数**，市场 CI 精确匹配；写成 `dsh-plugins` 不认） |
 | 仓库年龄 | 市场要求创建满 1 天，按 `created_at`（UTC）计算 |
@@ -132,7 +132,7 @@ npm view dsh-composer-model-controls --registry https://registry.npmjs.org
 git remote add origin https://github.com/timxiang-948/dsh-composer-model-controls.git
 git branch -M main
 git push -u origin main
-git push origin v0.4.5          # 标签必须单独推
+git push origin v0.5.0          # 标签必须单独推
 ```
 
 **不要用 `git push --tags`**：它会把从未公开发布的历史标签（如 `v0.4.4`）一起推上去。
@@ -164,7 +164,7 @@ git ls-remote origin
 https://github.com/timxiang-948/dsh-composer-model-controls/releases/latest/download/dsh-composer-model-controls.tgz
 ```
 
-这个 URL 只在请求时解析 `latest`，**文件名照字面取**。附件若叫 `…-0.4.5.tgz`，该链接当场 404；下次发版换附件内容即可，链接不用改。
+这个 URL 只在请求时解析 `latest`，**文件名照字面取**。附件若叫 `…-0.5.0.tgz`，该链接当场 404；下次发版换附件内容即可，链接不用改。
 
 核对（期望 200 且大小与本地 tgz 一致）：
 

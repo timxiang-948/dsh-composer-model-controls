@@ -1,7 +1,7 @@
 {
   "name": "dsh-composer-model-controls",
-  "version": "0.4.5",
-  "description": "Codex-style model + reasoning-effort controls in the DSH composer tool row: adaptive effort slider with snap, Pi-Harness-inspired effort colours on the track and composer border, and Shift+Tab cycling.",
+  "version": "0.5.0",
+  "description": "Reasoning-effort control in the DSH composer tool row: a Pi-Harness-inspired effort slider whose track and composer border tint with the level, Shift+Tab cycling, and the built-in model menu (incl. agent-team toggle) left untouched.",
   "keywords": [
     "dsh",
     "dsh-plugin",

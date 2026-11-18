@@ -174,7 +174,7 @@ const post = `
     slots: {
       inject: function (name, fn) { return fn(); },
       register: function (opts, component) {
-        if (opts && (opts.name === "conversation.input.model" || opts.name === "conversation.hero.options")) seatComponent = component;
+        if (opts && opts.name === "conversation.input.right") seatComponent = component;
         return { dispose: function () {} };
       }
     },
@@ -263,6 +263,9 @@ function buildPage({ name, autoOpen, shortcutMode, current, clean }) {
   .row { display: flex; align-items: center; gap: 10px; }
   .perm { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #5b6472; padding: 4px 8px; border-radius: 8px; }
   .spacer { flex: 1; }
+  .model { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #5b6472; padding: 4px 6px; border-radius: 8px; }
+  .model-icon { font-size: 12px; opacity: .75; }
+  .model-chev { font-size: 11px; opacity: .7; }
   .send { width: 32px; height: 32px; border-radius: 50%; background: #2f6fed; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 15px; }
   .hint { margin: 16px 4px; font-size: 12px; color: #7b8492; }
 </style>
@@ -276,6 +279,7 @@ function buildPage({ name, autoOpen, shortcutMode, current, clean }) {
       <span class="perm">自动审查 ▾</span>
       <span class="spacer"></span>
       <span id="seat"></span>
+      <span class="model"><span class="model-icon">▤</span>DeepSeek-V4.1-Flash<span class="model-chev">⌄</span></span>
       <span class="send">↑</span>
     </div>
   </div>
